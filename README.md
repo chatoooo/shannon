@@ -33,7 +33,7 @@ cipher := shannon.New(key)
 cipher.Decrypt(message)
 // message contains plaintext now
 mac := make([]byte, 16)
-if cipher.CheckMac(mac) == nil {
+if cipher.CheckMac(receivedMac) == nil {
 	fmt.Println("MAC OK")
 }
 ```
