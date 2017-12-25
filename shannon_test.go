@@ -1,4 +1,4 @@
-package go_shannon
+package shannon
 
 import (
 	"github.com/stretchr/testify/assert"

@@ -1,4 +1,4 @@
-package go_shannon
+package shannon
 
 import (
 	"bytes"
@@ -13,14 +13,14 @@ const (
 )
 
 func sbox1(w uint32) uint32 {
-	w = w ^ (w<<5 | w>>(32 - 5) | (w<<7 | w>>(32 - 7)))
-	w = w ^ (w<<19 | w>>(32 - 19) | (w<<22 | w>>(32 - 22)))
+	w = w ^ (w<<5 | w>>(32-5) | (w<<7 | w>>(32-7)))
+	w = w ^ (w<<19 | w>>(32-19) | (w<<22 | w>>(32-22)))
 	return w
 }
 
 func sbox2(w uint32) uint32 {
-	w = w ^ (w<<7 | w>>(32 - 7) | (w<<22 | w>>(32 - 22)))
-	w = w ^ (w<<5 | w>>(32 - 5) | (w<<19 | w>>(32 - 19)))
+	w = w ^ (w<<7 | w>>(32-7) | (w<<22 | w>>(32-22)))
+	w = w ^ (w<<5 | w>>(32-5) | (w<<19 | w>>(32-19)))
 	return w
 }
 
@@ -28,7 +28,7 @@ func rotl(w uint32, x uint) uint32 {
 	return (w << x) | (w >> (32 - x))
 }
 
-// Struct for shannon cipher state
+// Shannon is a struct for shannon cipher state
 type Shannon struct {
 	r     []uint32
 	crc   []uint32
@@ -42,10 +42,8 @@ type Shannon struct {
 type fullWordCallback func(*Shannon, *uint32)
 type byteCallback func(*Shannon, *byte)
 
-/**
-Creates a new instance of Shannon cipher
- */
-func ShannonNew(key []byte) *Shannon {
+// New creates a new instance of Shannon cipher
+func New(key []byte) *Shannon {
 	result := new(Shannon)
 	result.r = make([]uint32, n)
 	result.crc = make([]uint32, n)
@@ -133,9 +131,7 @@ func (sInst *Shannon) cycle() {
 	sInst.sbuf = t ^ sInst.r[8] ^ sInst.r[12]
 }
 
-/**
-Updates nonce
- */
+// Nonce updates nonce
 func (sInst *Shannon) Nonce(nonce []byte) {
 	sInst.reloadState()
 	sInst.konst = initKonst
@@ -199,8 +195,7 @@ func (sInst *Shannon) process(buf []byte, fullWord fullWordCallback, partial byt
 	}
 }
 
-// Combined MAC and encryption.
-// Note that plaintext is accumulated for MAC.
+// Encrypt encrypts bytes in buf
 func (sInst *Shannon) Encrypt(buf []byte) {
 	sInst.process(buf,
 		func(ctx *Shannon, word *uint32) {
@@ -213,8 +208,7 @@ func (sInst *Shannon) Encrypt(buf []byte) {
 		})
 }
 
-// Combined MAC and decryption.
-// Note that plaintext is accumulated for MAC.
+// Decrypt decrypts bytes in buf
 func (sInst *Shannon) Decrypt(buf []byte) {
 	sInst.process(buf,
 		func(ctx *Shannon, word *uint32) {
@@ -227,9 +221,7 @@ func (sInst *Shannon) Decrypt(buf []byte) {
 		})
 }
 
-/**
-Outputs MAC into the buffer
- */
+// Finish outputs MAC into the buffer
 func (sInst *Shannon) Finish(buf []byte) {
 	// handle any previously buffered bytes
 	if sInst.nbuf != 0 {
@@ -265,18 +257,14 @@ func (sInst *Shannon) Finish(buf []byte) {
 	}
 }
 
-/**
-Updates nonce as BigEndian uint32
- */
+// NonceU32 updates nonce as BigEndian uint32
 func (sInst *Shannon) NonceU32(n uint32) {
 	nonce := make([]byte, 4)
 	writeBigEndian(nonce, n)
 	sInst.Nonce(nonce)
 }
 
-/**
-Checks MAC integrity
- */
+// CheckMac checks MAC integrity
 func (sInst *Shannon) CheckMac(expected []byte) error {
 	actual := make([]byte, len(expected))
 	sInst.Finish(actual)

@@ -1,8 +1,8 @@
-package go_shannon
+package shannon
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestReadLittleEndian(t *testing.T) {
