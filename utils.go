@@ -1,4 +1,4 @@
-package shannon
+package go_shannon
 
 func chunkBytes(data []byte, size uint) [][]byte {
 	length := uint(len(data))
